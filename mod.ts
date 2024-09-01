@@ -89,12 +89,12 @@ function defineElement<T extends object>(
   tag: string,
   props: PropsDefinitionInput<T>,
   ComponentType: WcComponentType<T>
-): { elementConstructor: CustomElementConstructor } {
+): { elementConstructor: CustomElementConstructor; propTypes: T } {
   const elementConstructor = register<T>(
     tag,
     props as PropsDefinitionInput<T>
   )(withSolidWc(ComponentType));
-  return { elementConstructor };
+  return { elementConstructor, propTypes: null as unknown as T };
 }
 
 export { withSolidWc, defineElement };
