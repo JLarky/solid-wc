@@ -2,16 +2,15 @@
 
 import {
   register,
-  ComponentType as mComponentType,
-  ICustomElement,
-  FunctionComponent,
-  ComponentOptions,
-  PropsDefinitionInput,
-} from "component-register";
-export { hot, getCurrentElement, noShadowDOM } from "component-register";
+  type ComponentType as mComponentType,
+  type ICustomElement,
+  type ComponentOptions,
+  type PropsDefinitionInput,
+} from "npm:component-register";
+export { hot, getCurrentElement, noShadowDOM } from "npm:component-register";
 export type ComponentType<T> = mComponentType<T>;
-import { createRoot, createSignal } from "solid-js";
-import { insert } from "solid-js/web";
+import { createRoot, createSignal } from "npm:solid-js";
+import { insert } from "npm:solid-js/web";
 
 function createProps<T extends object>(raw: T) {
   const keys = Object.keys(raw) as (keyof T)[];
@@ -46,52 +45,56 @@ function lookupContext(el: ICustomElement & { _$owner?: any }) {
     : el._$owner;
 }
 
-function withSolid<T extends object>(
-  ComponentType: ComponentType<T>
+type WCComponentOptions<T> = {
+  props: T;
+  element: ICustomElement & { _$owner?: unknown } & HTMLElement;
+  setRenderRoot: (root: ICustomElement["renderRoot"] | null) => void;
+};
+
+type WcComponentType<T> = (options: WCComponentOptions<T>) => void;
+
+function withSolidWc<T extends object>(
+  ComponentType: WcComponentType<T>
 ): ComponentType<T> {
   return (rawProps: T, options: ComponentOptions) => {
-    const { element } = options as {
-      element: ICustomElement & { _$owner?: any };
-    };
-    return createRoot((dispose: Function) => {
+    const { element } = options as WCComponentOptions<T>;
+    return createRoot((dispose) => {
+      let renderRoot: ICustomElement["renderRoot"] | null = element;
       const props = createProps<T>(rawProps);
-
+      Object.defineProperty(element, "renderRoot", {
+        get() {
+          return renderRoot;
+        },
+      });
       element.addPropertyChangedCallback(
         (key: string, val: any) => (props[key as keyof T] = val)
       );
       element.addReleaseCallback(() => {
-        element.renderRoot.textContent = "";
+        if (renderRoot) renderRoot.textContent = "";
         dispose();
       });
-
-      const comp = (ComponentType as FunctionComponent<T>)(props as T, options);
-      return insert(element.renderRoot, comp);
+      const comp = (ComponentType as WcComponentType<T>)({
+        props,
+        element,
+        setRenderRoot: (value) => {
+          renderRoot = value;
+        },
+      });
+      if (renderRoot) return insert(renderRoot, comp);
     }, lookupContext(element));
   };
 }
 
-function customElement<T extends object>(
-  tag: string,
-  ComponentType: ComponentType<T>
-): CustomElementConstructor;
-function customElement<T extends object>(
+function defineElement<T extends object>(
   tag: string,
   props: PropsDefinitionInput<T>,
-  ComponentType: ComponentType<T>
-): CustomElementConstructor;
-function customElement<T extends object>(
-  tag: string,
-  props: PropsDefinitionInput<T> | ComponentType<T>,
-  ComponentType?: ComponentType<T>
-): CustomElementConstructor {
-  if (arguments.length === 2) {
-    ComponentType = props as ComponentType<T>;
-    props = {} as PropsDefinitionInput<T>;
-  }
-  return register<T>(
+  ComponentType: WcComponentType<T>
+): { elementConstructor: CustomElementConstructor } {
+  const elementConstructor = register<T>(
     tag,
     props as PropsDefinitionInput<T>
-  )(withSolid(ComponentType!));
+  )(withSolidWc(ComponentType));
+  return { elementConstructor };
 }
 
-export { withSolid, customElement };
+export { withSolidWc, defineElement };
