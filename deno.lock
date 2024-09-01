@@ -116,8 +116,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@deno/dnt@~0.41.3",
-      "npm:component-register@~0.8.6"
+      "jsr:@deno/dnt@~0.41.3"
     ]
   }
 }

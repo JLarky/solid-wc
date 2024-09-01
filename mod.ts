@@ -6,11 +6,15 @@ import {
   type ICustomElement,
   type ComponentOptions,
   type PropsDefinitionInput,
-} from "npm:component-register";
-export { hot, getCurrentElement, noShadowDOM } from "npm:component-register";
+} from "npm:component-register@~0.8.6";
+export {
+  hot,
+  getCurrentElement,
+  noShadowDOM,
+} from "npm:component-register@~0.8.6";
 export type ComponentType<T> = mComponentType<T>;
-import { createRoot, createSignal, JSX } from "npm:solid-js";
-import { render } from "npm:solid-js/web";
+import { createRoot, createSignal, type JSX } from "npm:solid-js@~1.8.22";
+import { render } from "npm:solid-js@~1.8.22/web";
 
 function createProps<T extends object>(raw: T) {
   const keys = Object.keys(raw) as (keyof T)[];
