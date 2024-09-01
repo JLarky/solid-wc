@@ -1,0 +1,12 @@
+{
+  "tasks": {
+    "dev": "deno run --watch main.ts"
+  },
+  "imports": {
+    "@deno/dnt": "jsr:@deno/dnt@^0.41.3",
+    "component-register": "npm:component-register@^0.8.6"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "esnext", "dom", "dom.iterable"]
+  }
+}
