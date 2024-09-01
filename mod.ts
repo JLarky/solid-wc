@@ -9,8 +9,8 @@ import {
 } from "npm:component-register";
 export { hot, getCurrentElement, noShadowDOM } from "npm:component-register";
 export type ComponentType<T> = mComponentType<T>;
-import { createRoot, createSignal } from "npm:solid-js";
-import { insert } from "npm:solid-js/web";
+import { createRoot, createSignal, JSX } from "npm:solid-js";
+import { render } from "npm:solid-js/web";
 
 function createProps<T extends object>(raw: T) {
   const keys = Object.keys(raw) as (keyof T)[];
@@ -51,7 +51,9 @@ type WCComponentOptions<T> = {
   setRenderRoot: (root: ICustomElement["renderRoot"] | null) => void;
 };
 
-type WcComponentType<T> = (options: WCComponentOptions<T>) => void;
+type WcComponentType<T> = (
+  options: WCComponentOptions<T>
+) => null | ((props: T) => JSX.Element);
 
 function withSolidWc<T extends object>(
   ComponentType: WcComponentType<T>
@@ -73,14 +75,14 @@ function withSolidWc<T extends object>(
         if (renderRoot) renderRoot.textContent = "";
         dispose();
       });
-      const comp = (ComponentType as WcComponentType<T>)({
+      const compFn = (ComponentType as WcComponentType<T>)({
         props,
         element,
         setRenderRoot: (value) => {
           renderRoot = value;
         },
       });
-      if (renderRoot) return insert(renderRoot, comp);
+      if (renderRoot && compFn) return render(() => compFn(props), renderRoot);
     }, lookupContext(element));
   };
 }
