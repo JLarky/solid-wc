@@ -1,6 +1,6 @@
 {
   "name": "@jlarky/solid-wc",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "exports": "./mod.ts",
   "tasks": {
     "dev": "deno run --watch main.ts"
@@ -10,5 +10,8 @@
   },
   "compilerOptions": {
     "lib": ["deno.ns", "esnext", "dom", "dom.iterable"]
+  },
+  "publish": {
+    "include": ["./mod.ts", "LICENSE", "README.md"]
   }
 }

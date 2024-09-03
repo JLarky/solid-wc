@@ -12,6 +12,9 @@ import { build, emptyDir } from "@deno/dnt";
 async function start() {
   await emptyDir("./npm");
 
+  const file = await Deno.readTextFile("./deno.jsonc");
+  const json = JSON.parse(file);
+
   await build({
     entryPoints: ["./mod.ts"],
     outDir: "./npm",
@@ -26,7 +29,7 @@ async function start() {
     },
     package: {
       name: "solid-wc",
-      version: Deno.args[0],
+      version: Deno.args[0] || json.version,
       description: "Write web components with SolidJS.",
       license: "MIT",
       keywords: ["solid", "solidjs", "web-components", "wc"],
