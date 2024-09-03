@@ -14,7 +14,13 @@ export {
 } from "npm:component-register@~0.8.6";
 export type ComponentType<T> = mComponentType<T>;
 import { createRoot, createSignal, type JSX } from "npm:solid-js@~1.8.22";
-import { render } from "npm:solid-js@~1.8.22/web";
+import {
+  generateHydrationScript,
+  render,
+  hydrate,
+  renderToString,
+  ssrElement,
+} from "npm:solid-js@~1.8.22/web";
 
 function createProps<T extends object>(raw: T) {
   const keys = Object.keys(raw) as (keyof T)[];
@@ -104,3 +110,35 @@ function defineElement<T extends object>(
 }
 
 export { withSolidWc, defineElement };
+
+type RenderOptions = Parameters<typeof renderToString>[1] & {
+  includeHydrationScript?: boolean;
+};
+
+export function defineElementSSR(
+  name: string,
+  component: () => JSX.Element
+): {
+  register(): void;
+  renderToString(opts: RenderOptions): string;
+} {
+  const hk = "solid-render-id";
+  return {
+    register() {
+      defineElement(name, { [hk]: "" }, ({ element, props }) => {
+        hydrate(component, element, { renderId: props[hk] });
+        return null;
+      });
+    },
+    renderToString(opts: RenderOptions) {
+      const html = renderToString(
+        () => ssrElement(name, { [hk]: opts.renderId }, component, false),
+        opts
+      );
+      const script = opts.includeHydrationScript
+        ? generateHydrationScript()
+        : "";
+      return script + html;
+    },
+  };
+}
