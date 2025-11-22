@@ -1,3 +1,7 @@
+# Status
+
+This project didn't get updates since 2024, I recommend you use [solid-element](https://www.npmjs.com/package/solid-element) or [@lift-html/solid](https://www.npmjs.com/package/@lift-html/solid) instead
+
 # Solid WC
 
 [![NPM Version](https://img.shields.io/npm/v/solid-wc)](https://www.npmjs.com/package/solid-wc)
